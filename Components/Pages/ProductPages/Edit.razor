@@ -1,0 +1,129 @@
+﻿@page "/products/edit"
+@using Microsoft.EntityFrameworkCore
+@using BlazorOnlineShop.Models
+@inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Product</h2>
+<hr />
+@if (Product is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Product" OnValidSubmit="UpdateProduct" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Product.ID" value="@Product.ID" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Product.Name" class="form-control" />
+                    <ValidationMessage For="() => Product.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="addeddate" class="form-label">AddedDate:</label>
+                    <InputDate id="addeddate" @bind-Value="Product.AddedDate" class="form-control" />
+                    <ValidationMessage For="() => Product.AddedDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="lastupdateddate" class="form-label">lastUpdatedDate:</label>
+                    <InputDate id="lastupdateddate" @bind-Value="Product.lastUpdatedDate" class="form-control" />
+                    <ValidationMessage For="() => Product.lastUpdatedDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="lastupdatedby" class="form-label">lastUpdatedBy:</label>
+                    <InputText id="lastupdatedby" @bind-Value="Product.lastUpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Product.lastUpdatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="categoryid" class="form-label">CategoryID:</label>
+                    <InputText id="categoryid" @bind-Value="Product.CategoryID" class="form-control" />
+                    <ValidationMessage For="() => Product.CategoryID" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="sellingprice" class="form-label">SellingPrice:</label>
+                    <InputNumber id="sellingprice" @bind-Value="Product.SellingPrice" class="form-control" />
+                    <ValidationMessage For="() => Product.SellingPrice" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="cost" class="form-label">Cost:</label>
+                    <InputNumber id="cost" @bind-Value="Product.Cost" class="form-control" />
+                    <ValidationMessage For="() => Product.Cost" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <InputText id="description" @bind-Value="Product.Description" class="form-control" />
+                    <ValidationMessage For="() => Product.Description" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="viewedcount" class="form-label">viewedCount:</label>
+                    <InputNumber id="viewedcount" @bind-Value="Product.viewedCount" class="form-control" />
+                    <ValidationMessage For="() => Product.viewedCount" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/products">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    [SupplyParameterFromForm]
+    private Product? Product { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Product ??= await context.Product.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (Product is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateProduct()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Product!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ProductExists(Product!.ID))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private bool ProductExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Product.Any(e => e.ID == id);
+    }
+}
