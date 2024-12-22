@@ -9,12 +9,12 @@ namespace BlazorOnlineShop.Models
 
         public string Name { get; set; }
 
-        public DateOnly AddedDate { get; set; }
-        public DateOnly lastUpdatedDate { get; set; }
+        public DateTime AddedDate { get; set; }
+        public DateTime lastUpdatedDate { get; set; }
 
         public string? lastUpdatedBy { get; set; }
 
-        public string CategoryID { get; set; }
+        public int CategoryID { get; set; }
 
         [DataType(DataType.Currency)]
         [Column(TypeName = "decimal(18, 2)")]
@@ -27,5 +27,7 @@ namespace BlazorOnlineShop.Models
         public string? Description { get; set; }
 
         public int viewedCount { get; set; }
+
+        public string? imgUrl { get; set; }
     }
 }

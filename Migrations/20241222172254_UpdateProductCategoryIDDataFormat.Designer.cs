@@ -4,6 +4,7 @@ using BlazorOnlineShop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorOnlineShop.Migrations
 {
     [DbContext(typeof(BlazorOnlineShopContext))]
-    partial class BlazorOnlineShopContextModelSnapshot : ModelSnapshot
+    [Migration("20241222172254_UpdateProductCategoryIDDataFormat")]
+    partial class UpdateProductCategoryIDDataFormat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

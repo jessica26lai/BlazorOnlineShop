@@ -27,13 +27,13 @@ else
                     <InputText id="name" @bind-Value="Product.Name" class="form-control" />
                     <ValidationMessage For="() => Product.Name" class="text-danger" />
                 </div>
-                <div class="mb-3">
+@*                <div class="mb-3">
                     <label for="addeddate" class="form-label">AddedDate:</label>
                     <InputDate id="addeddate" @bind-Value="Product.AddedDate" class="form-control" />
                     <ValidationMessage For="() => Product.AddedDate" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="lastupdateddate" class="form-label">lastUpdatedDate:</label>
+                     <label for="lastupdateddate" class="form-label">lastUpdatedDate:</label>
                     <InputDate id="lastupdateddate" @bind-Value="Product.lastUpdatedDate" class="form-control" />
                     <ValidationMessage For="() => Product.lastUpdatedDate" class="text-danger" />
                 </div>
@@ -41,10 +41,10 @@ else
                     <label for="lastupdatedby" class="form-label">lastUpdatedBy:</label>
                     <InputText id="lastupdatedby" @bind-Value="Product.lastUpdatedBy" class="form-control" />
                     <ValidationMessage For="() => Product.lastUpdatedBy" class="text-danger" />
-                </div>
+                </div> *@
                 <div class="mb-3">
                     <label for="categoryid" class="form-label">CategoryID:</label>
-                    <InputText id="categoryid" @bind-Value="Product.CategoryID" class="form-control" />
+                    <InputNumber id="categoryid" @bind-Value="Product.CategoryID" class="form-control" />
                     <ValidationMessage For="() => Product.CategoryID" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -62,11 +62,11 @@ else
                     <InputText id="description" @bind-Value="Product.Description" class="form-control" />
                     <ValidationMessage For="() => Product.Description" class="text-danger" />
                 </div>
-                <div class="mb-3">
+@*                 <div class="mb-3">
                     <label for="viewedcount" class="form-label">viewedCount:</label>
                     <InputNumber id="viewedcount" @bind-Value="Product.viewedCount" class="form-control" />
                     <ValidationMessage For="() => Product.viewedCount" class="text-danger" />
-                </div>
+                </div> *@
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
         </div>
@@ -104,6 +104,8 @@ else
 
         try
         {
+            Product!.lastUpdatedDate = DateTime.Now;
+            Product!.lastUpdatedBy = "admin";
             await context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)

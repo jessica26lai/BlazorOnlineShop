@@ -1,4 +1,5 @@
 ﻿@page "/products/create"
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using BlazorOnlineShop.Models
 @inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
@@ -20,24 +21,24 @@
                 <InputText id="name" @bind-Value="Product.Name" class="form-control" /> 
                 <ValidationMessage For="() => Product.Name" class="text-danger" /> 
             </div>        
-            <div class="mb-3">
+@*             <div class="mb-3">
                 <label for="addeddate" class="form-label">AddedDate:</label> 
                 <InputDate id="addeddate" @bind-Value="Product.AddedDate" class="form-control" /> 
                 <ValidationMessage For="() => Product.AddedDate" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
+            </div>    *@     
+@*             <div class="mb-3">
                 <label for="lastupdateddate" class="form-label">lastUpdatedDate:</label> 
                 <InputDate id="lastupdateddate" @bind-Value="Product.lastUpdatedDate" class="form-control" /> 
                 <ValidationMessage For="() => Product.lastUpdatedDate" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
+            </div>   *@      
+@*             <div class="mb-3">
                 <label for="lastupdatedby" class="form-label">lastUpdatedBy:</label> 
                 <InputText id="lastupdatedby" @bind-Value="Product.lastUpdatedBy" class="form-control" /> 
                 <ValidationMessage For="() => Product.lastUpdatedBy" class="text-danger" /> 
-            </div>        
+            </div>   *@      
             <div class="mb-3">
                 <label for="categoryid" class="form-label">CategoryID:</label> 
-                <InputText id="categoryid" @bind-Value="Product.CategoryID" class="form-control" /> 
+                <InputNumber id="categoryid" @bind-Value="Product.CategoryID" class="form-control" />
                 <ValidationMessage For="() => Product.CategoryID" class="text-danger" /> 
             </div>        
             <div class="mb-3">
@@ -54,13 +55,24 @@
                 <label for="description" class="form-label">Description:</label> 
                 <InputText id="description" @bind-Value="Product.Description" class="form-control" /> 
                 <ValidationMessage For="() => Product.Description" class="text-danger" /> 
-            </div>        
+            </div> 
             <div class="mb-3">
+                <label for="imageUpload" class="form-label">Upload Image:</label>
+                <InputFile id="imageUpload" OnChange="OnImageSelected" />
+                <ValidationMessage For="() => Product.imgUrl" class="text-danger" />
+                @if (!string.IsNullOrEmpty(FileError))
+                {
+                    <br><span class="text-danger">@FileError</span>
+
+                }
+            </div>
+
+            @*             <div class="mb-3">
                 <label for="viewedcount" class="form-label">viewedCount:</label> 
                 <InputNumber id="viewedcount" @bind-Value="Product.viewedCount" class="form-control" /> 
                 <ValidationMessage For="() => Product.viewedCount" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+            </div>  *@       
+            <button type="submit" class="btn btn-primary" disabled="@HasError">Create</button>
         </EditForm>
     </div>
 </div>
@@ -72,11 +84,64 @@
 @code {
     [SupplyParameterFromForm]
     private Product Product { get; set; } = new();
+    private IBrowserFile? UploadedImage { get; set; } // To hold the uploaded file
+    private string FileError { get; set; }
+    private bool HasError => !string.IsNullOrEmpty(FileError) || string.IsNullOrWhiteSpace(Product.Name) || Product.CategoryID <= 0;
+
+    // Handle the file selection
+    private void OnImageSelected(InputFileChangeEventArgs e)
+    {
+        UploadedImage = e.File; // Save the file reference for later processing
+        const long maxFileSize = 1 * 1024 * 1024; // 1 MB
+
+        if (UploadedImage.Size > maxFileSize)
+        {
+            FileError = "The uploaded file exceeds the 1 MB size limit.";
+            UploadedImage = null; // Reset the file
+            return;
+        }
+
+        FileError = null; // Clear errors if validation passes
+
+    }
+
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddProduct()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Handle image upload if a file is provided
+        if (UploadedImage != null)
+        {
+            // Ensure the file is an image
+            if (!UploadedImage.ContentType.StartsWith("image/"))
+            {
+                throw new InvalidOperationException("Only image files are allowed.");
+            }
+
+            // Generate a unique file name
+            var fileName = $"{Guid.NewGuid()}_{UploadedImage.Name}";
+
+            // Define the path to save the file
+            var savePath = Path.Combine(Environment.CurrentDirectory, "wwwroot/upload/ProductImages", fileName);
+
+            // Ensure the directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+
+            // Save the file
+            await using var stream = new FileStream(savePath, FileMode.Create);
+            await UploadedImage.OpenReadStream().CopyToAsync(stream);
+
+            // Set the ImgUrl property to the relative URL
+            Product.imgUrl = $"/upload/ProductImages/{fileName}";
+        }
+
+        Product.lastUpdatedBy = "admin";
+        Product.AddedDate = DateTime.Now;
+        Product.lastUpdatedDate = DateTime.Now;
+        Product.viewedCount = 0;
+
         context.Product.Add(Product);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/products");
