@@ -4,43 +4,69 @@
 @inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
 @inject NavigationManager NavigationManager
 
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/product_detail.css" rel="stylesheet" />
+</head>
+
 <PageTitle>Details</PageTitle>
 
-<h1>Details</h1>
-
 <div>
-    <h2>Product</h2>
-    <hr />
     @if (product is null)
     {
         <p><em>Loading...</em></p>
     }
     else {
-        <dl class="row">
-            <dt class="col-sm-2">Name</dt>
-            <dd class="col-sm-10">@product.Name</dd>
-            <dt class="col-sm-2">AddedDate</dt>
-            <dd class="col-sm-10">@product.AddedDate</dd>
-            <dt class="col-sm-2">lastUpdatedDate</dt>
-            <dd class="col-sm-10">@product.lastUpdatedDate</dd>
-            <dt class="col-sm-2">lastUpdatedBy</dt>
-            <dd class="col-sm-10">@product.lastUpdatedBy</dd>
-            <dt class="col-sm-2">CategoryID</dt>
-            <dd class="col-sm-10">@product.CategoryID</dd>
-            <dt class="col-sm-2">SellingPrice</dt>
-            <dd class="col-sm-10">@product.SellingPrice</dd>
-            <dt class="col-sm-2">Cost</dt>
-            <dd class="col-sm-10">@product.Cost</dd>
-            <dt class="col-sm-2">Description</dt>
-            <dd class="col-sm-10">@product.Description</dd>
-            <dt class="col-sm-2">viewedCount</dt>
-            <dd class="col-sm-10">@product.viewedCount</dd>
-        </dl>
-        <div>
-            <a href="@($"/products/edit?id={product.ID}")">Edit</a> |
-            <a href="@($"/products")">Back to List</a>
+        <h1 class="d-flex align-items-center">
+            @product.Name
+            <div class="d-flex align-items-center ms-auto">
+                <i class="bi bi-fire text-danger me-2"></i>
+                <span class="viewed-count">@product.viewedCount views</span>
+            </div>
+        </h1>
+        <hr />
+        <div class="product-container">
+            <!-- Left column for the image -->
+
+                @if (!string.IsNullOrEmpty(product.imgUrl))
+                {
+                    <img src="@product.imgUrl" alt="Product Image" class="product-image" />
+                }
+                else
+                {
+                    <span>No image available</span>
+                }
+
+
+            <!-- Right column for product details -->
+            <div class="col-md-8 product-details">
+                <div class="product-basic-info">
+                    <dl class="row">
+                    <dt class="col-sm-3 productDetail-title">Price</dt>
+                    <dd class="col-sm-9 productDetail-content">@($"£{product.SellingPrice:0.00}")</dd>
+                    </dl>
+
+                    <dl class="row">
+                    <dt class="col-sm-3 productDetail-title">Description</dt>
+                    <dd class="col-sm-9 productDetail-content">@product.Description</dd>
+                    </dl>
+
+                
+                </div>
+
+                <div class="product-dates">
+                        Added: @product.AddedDate<br>
+                        Last updated: @product.lastUpdatedDate
+                </div>
+
+
+            </div>
         </div>
     }
+</div>
+
+<div>
+    <a href="@($"/products/GridView")">Back to List</a>
 </div>
 
 @code {
@@ -58,5 +84,10 @@
         {
             NavigationManager.NavigateTo("notfound");
         }
+
+        // Increment the viewedCount and save changes
+        product.viewedCount++;
+        await context.SaveChangesAsync();
+
     }
 }

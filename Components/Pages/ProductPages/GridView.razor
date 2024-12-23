@@ -1,0 +1,40 @@
+﻿@page "/products/gridview"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using BlazorOnlineShop.Models
+@using BlazorOnlineShop.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
+
+<PageTitle>Product List</PageTitle>
+
+<link href="css/product_gridview.css" rel="stylesheet" />
+
+<h1>Product List</h1>
+
+
+<div class="product-row">
+    @foreach (var product in Products)
+    {
+        <div class="product-item">
+            <a href="@($"products/details?id={product.ID}")">
+                <img src="@product.imgUrl" alt="Product Image" class="product-image" />
+            </a>
+            <p class="product-name">@product.Name</p>
+            <p class="product-price">£@product.SellingPrice</p>
+        </div>
+    }
+</div>
+
+@code {
+    private BlazorOnlineShopContext dbContext = default!;
+    private List<Product> Products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        dbContext = DbFactory.CreateDbContext();
+        Products = await dbContext.Product.ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync() => await dbContext.DisposeAsync();
+}
