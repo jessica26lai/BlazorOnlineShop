@@ -1,4 +1,15 @@
 ﻿@page "/"
+<script>
+    window.sessionStorage = {
+        getItem: function (key) {
+            const data = sessionStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        },
+        setItem: function (key, value) {
+            sessionStorage.setItem(key, JSON.stringify(value));
+        }
+    };
+</script>
 
 <PageTitle>Home</PageTitle>
 

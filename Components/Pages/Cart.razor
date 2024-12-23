@@ -1,0 +1,95 @@
+﻿@page "/cart"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using BlazorOnlineShop.Models
+@inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject ProtectedLocalStorage ProtectedLocalStore
+@inject IJSRuntime JsRuntime
+
+<h2>Your Cart</h2>
+
+
+@if (cart != null && cart.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in cart)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.Quantity</td>
+                    <td>@($"£{item.ProductPrice:0.00}")</td>
+                    <td>@($"£{item.Quantity * item.ProductPrice:0.00}")</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(item)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div>
+        <strong>Total: £@TotalAmount</strong>
+    </div>
+}
+else
+{
+    <p>Your cart is empty.</p>
+}
+<br />
+<a href="/products/GridView">Back to Product List</a>
+
+
+
+@code {
+    public List<CartItem> cart;
+    public decimal TotalAmount { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var result = await ProtectedLocalStore.GetAsync<List<CartItem>>("cart");
+        cart = result.Value;
+
+        if (cart != null)
+        {
+            TotalAmount = 0;
+            foreach (var item in cart)
+            {
+                TotalAmount += item.Quantity * item.ProductPrice;
+            }
+        }
+        else
+        {
+            TotalAmount = 0;
+        }
+    }
+
+    private async Task DeleteItem(CartItem itemToRemove)
+    {
+        if (cart != null)
+        {
+            cart.Remove(itemToRemove);
+
+            await ProtectedLocalStore.SetAsync("cart", cart);
+
+            TotalAmount = cart.Sum(x => x.Quantity * x.ProductPrice);
+
+            StateHasChanged();
+        }
+    }
+
+
+
+}
