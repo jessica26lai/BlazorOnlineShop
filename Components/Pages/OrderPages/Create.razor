@@ -1,0 +1,195 @@
+﻿@page "/orders/create"
+@using Microsoft.EntityFrameworkCore
+@using BlazorOnlineShop.Models
+@inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject ProtectedLocalStorage ProtectedLocalStore
+
+<head>
+    <link href="css/order_create.css" rel="stylesheet" />
+
+</head>
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create Order</h1>
+
+
+<hr />
+<div class="content-container">
+    <div class="form-container">
+        <EditForm method="post" Model="Order" OnValidSubmit="AddOrder" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="clientname" class="form-label">Name:</label> 
+                <InputText id="clientname" @bind-Value="Order.ClientName" class="form-control" /> 
+                <ValidationMessage For="() => Order.ClientName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="clientemail" class="form-label">Email:</label> 
+                <InputText id="clientemail" @bind-Value="Order.ClientEmail" class="form-control" /> 
+                <ValidationMessage For="() => Order.ClientEmail" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="clientaddress" class="form-label">Address:</label> 
+                <InputText id="clientaddress" @bind-Value="Order.ClientAddress" class="form-control" /> 
+                <ValidationMessage For="() => Order.ClientAddress" class="text-danger" /> 
+            </div>        
+@*             <div class="mb-3">
+                <label for="ordereddate" class="form-label">OrderedDate:</label> 
+                <InputDate id="ordereddate" @bind-Value="Order.OrderedDate" class="form-control" /> 
+                <ValidationMessage For="() => Order.OrderedDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="lastupdateddate" class="form-label">LastUpdatedDate:</label> 
+                <InputDate id="lastupdateddate" @bind-Value="Order.LastUpdatedDate" class="form-control" /> 
+                <ValidationMessage For="() => Order.LastUpdatedDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="lastupdatedby" class="form-label">LastUpdatedBy:</label> 
+                <InputText id="lastupdatedby" @bind-Value="Order.LastUpdatedBy" class="form-control" /> 
+                <ValidationMessage For="() => Order.LastUpdatedBy" class="text-danger" /> 
+            </div>         *@
+            <div id="btn-order"><button type="submit" class="btn btn-primary btn-lg mb-3 float-right">Place order</button></div>
+        </EditForm>
+    </div>
+
+    <div class="table-container">
+@if (cart != null && cart.Count > 0)
+{
+
+    <table class="table">
+        <thead>
+            <tr class="table-active">
+                <th >Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in cart)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.Quantity</td>
+                    <td>@($"£{item.ProductPrice:0.00}")</td>
+                    <td>@($"£{item.Quantity * item.ProductPrice:0.00}")</td>
+                    <td>
+                       
+                    </td>
+                </tr>
+            }
+
+            <tr class="table-primary">
+                <td></td>
+                <td></td>
+                <td><strong>Total Amount:</strong></td>
+                <td><strong>£@TotalAmount</strong></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+    </div>
+
+</div>
+
+
+
+<div id="link-back">
+    <a href="/cart">Back to Cart</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    private Order Order { get; set; } = new();
+    public List<CartItem> cart;
+    public decimal TotalAmount { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var result = await ProtectedLocalStore.GetAsync<List<CartItem>>("cart");
+        cart = result.Value;
+
+        if (cart != null)
+        {
+            TotalAmount = 0;
+            foreach (var item in cart)
+            {
+                TotalAmount += item.Quantity * item.ProductPrice;
+            }
+        }
+        else
+        {
+            TotalAmount = 0;
+        }
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddOrder()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        if (cart == null || cart.Count == 0)
+        {
+            throw new InvalidOperationException("The cart is empty.");
+        }
+
+        // Create a new order
+        var order = new Order
+        {
+            ClientName = Order.ClientName,
+            ClientEmail = Order.ClientEmail,
+            ClientAddress = Order.ClientAddress,
+            OrderedDate = DateTime.Now,
+            LastUpdatedDate = DateTime.Now,
+            LastUpdatedBy = "admin"
+        };
+
+        context.Order.Add(order);
+        await context.SaveChangesAsync();
+
+        // Add cart items as OrderItems
+        foreach (var cartItem in cart)
+        {
+            var orderItem = new OrderItem
+            {
+                OrderID = order.ID,
+                ProductID = cartItem.ProductID,
+                Quantity = cartItem.Quantity,
+                ProductPrice = cartItem.ProductPrice,
+                OrderedDate = DateTime.Now,
+                LastUpdatedDate = DateTime.Now
+            };
+
+            context.OrderItem.Add(orderItem);
+        }
+
+        await context.SaveChangesAsync();
+
+        // Clear the cart after successful order placement
+        await ProtectedLocalStore.SetAsync("cart", new List<CartItem>());
+
+
+        // using var context = DbFactory.CreateDbContext();
+
+        // Order.lastUpdatedBy = "admin";
+        // Order.AddedDate = DateTime.Now;
+        // Order.lastUpdatedDate = DateTime.Now;
+
+        // context.Order.Add(Order);
+        // await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/");
+    }
+
+
+
+
+}

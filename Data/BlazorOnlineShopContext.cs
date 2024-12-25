@@ -15,5 +15,7 @@ namespace BlazorOnlineShop.Data
         }
 
         public DbSet<BlazorOnlineShop.Models.Product> Product { get; set; } = default!;
+        public DbSet<BlazorOnlineShop.Models.Order> Order { get; set; } = default!;
+        public DbSet<BlazorOnlineShop.Models.OrderItem> OrderItem { get; set; } = default!;
     }
 }

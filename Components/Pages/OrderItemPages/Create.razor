@@ -1,0 +1,69 @@
+﻿@page "/orderitems/create"
+@using Microsoft.EntityFrameworkCore
+@using BlazorOnlineShop.Models
+@inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>OrderItem</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="OrderItem" OnValidSubmit="AddOrderItem" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="orderid" class="form-label">OrderID:</label> 
+                <InputNumber id="orderid" @bind-Value="OrderItem.OrderID" class="form-control" /> 
+                <ValidationMessage For="() => OrderItem.OrderID" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="productid" class="form-label">ProductID:</label> 
+                <InputNumber id="productid" @bind-Value="OrderItem.ProductID" class="form-control" /> 
+                <ValidationMessage For="() => OrderItem.ProductID" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity:</label> 
+                <InputNumber id="quantity" @bind-Value="OrderItem.Quantity" class="form-control" /> 
+                <ValidationMessage For="() => OrderItem.Quantity" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="productprice" class="form-label">ProductPrice:</label> 
+                <InputNumber id="productprice" @bind-Value="OrderItem.ProductPrice" class="form-control" /> 
+                <ValidationMessage For="() => OrderItem.ProductPrice" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="ordereddate" class="form-label">OrderedDate:</label> 
+                <InputDate id="ordereddate" @bind-Value="OrderItem.OrderedDate" class="form-control" /> 
+                <ValidationMessage For="() => OrderItem.OrderedDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="lastupdateddate" class="form-label">LastUpdatedDate:</label> 
+                <InputDate id="lastupdateddate" @bind-Value="OrderItem.LastUpdatedDate" class="form-control" /> 
+                <ValidationMessage For="() => OrderItem.LastUpdatedDate" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/orderitems">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private OrderItem OrderItem { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddOrderItem()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.OrderItem.Add(OrderItem);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/orderitems");
+    }
+}

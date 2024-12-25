@@ -17,9 +17,11 @@
     @foreach (var product in Products)
     {
         <div class="product-item">
-            <a href="@($"products/details?id={product.ID}")">
-                <img src="@product.imgUrl" alt="Product Image" class="product-image" />
-            </a>
+            <div class="product-image-box">
+                <a href="@($"products/details?id={product.ID}")">
+                    <img src="@product.imgUrl" alt="Product Image" class="product-image" />
+                </a>
+            </div>
             <p class="product-name">@product.Name</p>
             <p class="product-price">£@product.SellingPrice</p>
         </div>

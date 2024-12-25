@@ -36,11 +36,11 @@
                 <InputText id="lastupdatedby" @bind-Value="Product.lastUpdatedBy" class="form-control" /> 
                 <ValidationMessage For="() => Product.lastUpdatedBy" class="text-danger" /> 
             </div>   *@      
-            <div class="mb-3">
+@*             <div class="mb-3">
                 <label for="categoryid" class="form-label">CategoryID:</label> 
                 <InputNumber id="categoryid" @bind-Value="Product.CategoryID" class="form-control" />
                 <ValidationMessage For="() => Product.CategoryID" class="text-danger" /> 
-            </div>        
+            </div>  *@       
             <div class="mb-3">
                 <label for="sellingprice" class="form-label">SellingPrice:</label> 
                 <InputNumber id="sellingprice" @bind-Value="Product.SellingPrice" class="form-control" /> 
@@ -137,6 +137,7 @@
             Product.imgUrl = $"/upload/ProductImages/{fileName}";
         }
 
+        Product.CategoryID = 1;
         Product.lastUpdatedBy = "admin";
         Product.AddedDate = DateTime.Now;
         Product.lastUpdatedDate = DateTime.Now;

@@ -8,14 +8,15 @@
 @inject IJSRuntime JsRuntime
 
 <h2>Your Cart</h2>
-
+<br />
+<br />
 
 @if (cart != null && cart.Count > 0)
 {
     <table class="table">
         <thead>
-            <tr>
-                <th>Product</th>
+            <tr class="table-active">
+                <th >Product</th>
                 <th>Quantity</th>
                 <th>Price</th>
                 <th>Total</th>
@@ -35,12 +36,23 @@
                     </td>
                 </tr>
             }
+
+            <tr class="table-primary">
+                <td></td>
+                <td></td>
+                <td><strong>Total Amount:</strong></td>
+                <td><strong>£@TotalAmount</strong></td>
+                <td></td>
+            </tr>
+            <tr style="border-style: hidden;">
+                <td ></td>
+                <td></td>
+                <td></td>
+                <td><a href="/orders/create"><button type="button" class="btn btn-primary">Proceed</button></a></td>
+            </tr>
         </tbody>
     </table>
 
-    <div>
-        <strong>Total: £@TotalAmount</strong>
-    </div>
 }
 else
 {

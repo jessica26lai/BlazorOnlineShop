@@ -1,0 +1,112 @@
+﻿@page "/orders/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorOnlineShop.Models
+@inject IDbContextFactory<BlazorOnlineShop.Data.BlazorOnlineShopContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Order</h2>
+    <hr />
+    @if (order is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">ClientName</dt>
+            <dd class="col-sm-10">@order.ClientName</dd>
+            <dt class="col-sm-2">ClientEmail</dt>
+            <dd class="col-sm-10">@order.ClientEmail</dd>
+            <dt class="col-sm-2">ClientAddress</dt>
+            <dd class="col-sm-10">@order.ClientAddress</dd>
+            <dt class="col-sm-2">OrderedDate</dt>
+            <dd class="col-sm-10">@order.OrderedDate</dd>
+            <dt class="col-sm-2">LastUpdatedDate</dt>
+            <dd class="col-sm-10">@order.LastUpdatedDate</dd>
+            <dt class="col-sm-2">LastUpdatedBy</dt>
+            <dd class="col-sm-10">@order.LastUpdatedBy</dd>
+        </dl>
+
+
+        @if (orderItems != null && orderItems.Any())
+        {
+            <h5>Ordered Items</h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th>Ordered Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in orderItems)
+                    {
+                        <tr>
+                            <td>@item.ProductID</td>
+                            <td>@item.ProductName</td>
+                            <td>@item.Quantity</td>
+                            <td>@($"£{item.ProductPrice:0.00}")</td>
+                            <td>@($"£{item.TotalPrice:0.00}")</td>
+                            <td>@item.OrderedDate</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No items found for this order.</p>
+        }
+
+        <div>
+            <a href="@($"/orders/edit?id={order.ID}")">Edit</a> |
+            <a href="@($"/orders")">Back to List</a>
+        </div>
+    }
+</div>
+
+
+@code {
+    private Order? order;
+    private List<OrderItemDetail> orderItems;
+
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        order = await context.Order.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (order is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+
+        // Load the associated order items and include product names
+        orderItems = await context.OrderItem
+            .Where(item => item.OrderID == ID)
+            .Join(context.Product,
+                orderItem => orderItem.ProductID,
+                product => product.ID,
+                (orderItem, product) => new OrderItemDetail
+                    {
+                        ProductID = product.ID,
+                        ProductName = product.Name,
+                        Quantity = orderItem.Quantity,
+                        ProductPrice = orderItem.ProductPrice,
+                        OrderedDate = orderItem.OrderedDate
+                    })
+            .ToListAsync();
+    }
+
+
+}

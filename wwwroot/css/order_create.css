@@ -1,0 +1,24 @@
+﻿.content-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px; 
+}
+
+.form-container {
+    flex: 1; 
+    max-width: 50%;
+}
+
+.table-container {
+    flex: 1; 
+    max-width: 50%; 
+    overflow-x: auto; 
+}
+
+#btn-order {
+    display: flex;
+    justify-content: right; 
+
+}
+
